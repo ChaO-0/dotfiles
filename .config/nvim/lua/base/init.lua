@@ -16,6 +16,7 @@ vim.opt.mouse = "a"
 vim.opt.scrolloff = 10
 vim.opt.ttyfast = true
 vim.opt.wrap = false
+vim.opt.splitright = true
 
 -- highlights
 vim.opt.cursorline = true
