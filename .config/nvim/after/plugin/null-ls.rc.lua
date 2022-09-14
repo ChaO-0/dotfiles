@@ -1,24 +1,20 @@
-local ok, null_ls = pcall(require, 'null-ls')
-if not ok then return end
+local ok, null_ls = pcall(require, "null-ls")
+if not ok then
+	return
+end
 
-null_ls.setup {
-	--	on_attach = function(client, bufnr)
-	--    if client.server_capabilities.documentFormattingProvider then
-	--      vim.cmd("nnoremap <silent><buffer> <Leader>f :lua vim.lsp.buf.formatting()<CR>")
-	--
-	--      -- format on save
-	--      vim.cmd("autocmd BufWritePost <buffer> lua vim.lsp.buf.formatting()")
-	--    end
-	on_attach = function(client, bufnr)
+null_ls.setup({
+	on_attach = function(client)
 		if client.server_capabilities.documentFormattingProvider then
-			vim.api.nvim_command [[augroup Format]]
-			vim.api.nvim_command [[autocmd! * <buffer>]]
-			vim.api.nvim_command [[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_seq_sync()]]
-			vim.api.nvim_command [[augroup END]]
+			vim.api.nvim_command([[augroup format]])
+			vim.api.nvim_command([[autocmd! * <buffer>]])
+			vim.api.nvim_command([[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()]])
+			vim.api.nvim_command([[augroup end]])
 		end
-
-		if client.server_capabilities.documentRangeFormattingProvider then
-			vim.cmd("xnoremap <silent><buffer> <Leader>f :lua vim.lsp.buf.range_formatting({})<CR>")
-		end
-	end
-}
+	end,
+	sources = {
+		null_ls.builtins.formatting.stylua,
+		null_ls.builtins.formatting.prettierd,
+		-- null_ls.builtins.completion.spell,
+	},
+})

@@ -1,10 +1,12 @@
-local ok, nvimtree = pcall(require, 'nvim-tree')
-if not ok then return end
+local ok, nvimtree = pcall(require, "nvim-tree")
+if not ok then
+	return
+end
 
-nvimtree.setup {
+nvimtree.setup({
 	auto_reload_on_write = true,
 	create_in_closed_folder = false,
-	disable_netrw = false,
+	disable_netrw = true,
 	hijack_cursor = false,
 	hijack_netrw = true,
 	hijack_unnamed_buffer_when_opening = false,
@@ -23,12 +25,12 @@ nvimtree.setup {
 	remove_keymaps = false, -- boolean (disable totally or not) or list of key (lhs)
 	view = {
 		adaptive_size = false,
-		centralize_selection = false,
+		centralize_selection = true,
 		width = 30,
 		height = 30,
 		hide_root_folder = false,
 		side = "left",
-		preserve_window_proportions = false,
+		preserve_window_proportions = true,
 		number = false,
 		relativenumber = false,
 		signcolumn = "yes",
@@ -118,7 +120,11 @@ nvimtree.setup {
 		update_root = false,
 		ignore_list = {},
 	},
-	ignore_ft_on_setup = {},
+	ignore_ft_on_setup = {
+		"startify",
+		"dashboard",
+		"alpha",
+	},
 	system_open = {
 		cmd = "",
 		args = {},
@@ -191,7 +197,7 @@ nvimtree.setup {
 	},
 	live_filter = {
 		prefix = "[FILTER]: ",
-always_show_folders = true,
+		always_show_folders = true,
 	},
 	log = {
 		enable = false,
@@ -206,16 +212,16 @@ always_show_folders = true,
 			profile = false,
 			watcher = false,
 		},
-	}
-}
+	},
+})
 
-vim.keymap.set('n', '<C-t>', '<Cmd>NvimTreeToggle<CR>', { silent = true })
+vim.keymap.set("n", "<C-t>", "<Cmd>NvimTreeToggle<CR>", { silent = true })
 
 vim.api.nvim_create_autocmd("BufEnter", {
-  nested = true,
-  callback = function()
-    if #vim.api.nvim_list_wins() == 1 and vim.api.nvim_buf_get_name(0):match("NvimTree_") ~= nil then
-      vim.cmd "quit"
-    end
-  end
+	nested = true,
+	callback = function()
+		if #vim.api.nvim_list_wins() == 1 and vim.api.nvim_buf_get_name(0):match("NvimTree_") ~= nil then
+			vim.cmd("quit")
+		end
+	end,
 })
