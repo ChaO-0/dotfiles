@@ -17,6 +17,7 @@ return require("packer").startup(function(use)
 	use("andweeb/presence.nvim")
 	use("kyazdani42/nvim-web-devicons")
 	use("folke/which-key.nvim")
+	use("nvim-lua/plenary.nvim")
 
 	-- UI
 	use({
@@ -41,6 +42,7 @@ return require("packer").startup(function(use)
 
 	-- autopair
 	use("windwp/nvim-autopairs")
+	use("tpope/vim-surround")
 
 	-- telescope / file browser
 	use({
@@ -69,8 +71,8 @@ return require("packer").startup(function(use)
 	})
 
 	-- for easier code reading
-	use 'jose-elias-alvarez/null-ls.nvim'
-	use 'MunifTanjim/prettier.nvim'
+	use("jose-elias-alvarez/null-ls.nvim")
+	use("MunifTanjim/prettier.nvim")
 	use("lukas-reineke/indent-blankline.nvim")
 
 	-- commentor
