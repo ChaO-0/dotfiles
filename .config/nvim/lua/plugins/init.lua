@@ -33,6 +33,8 @@ return require("packer").startup(function(use)
 	use("hrsh7th/nvim-cmp") -- completion
 	use("L3MON4D3/LuaSnip") --lua snip
 	use("glepnir/lspsaga.nvim")
+	use("williamboman/mason.nvim")
+	use("williamboman/mason-lspconfig.nvim")
 
 	-- syntax highlighting
 	use({
