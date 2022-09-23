@@ -11,5 +11,5 @@ end
 mason.setup({})
 
 nvim_lsp.setup({
-	ensure_installed = { "sumneko_lua", "tsserver" },
+	ensure_installed = { "sumneko_lua", "tsserver", "eslint" },
 })

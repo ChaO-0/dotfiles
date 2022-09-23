@@ -5,11 +5,42 @@ end
 
 local protocol = require("vim.lsp.protocol")
 
+local augroup_format = vim.api.nvim_create_augroup("Format", { clear = true })
+
+local doFormatTS = function()
+	vim.api.nvim_create_autocmd("BufWritePre", {
+		group = augroup_format,
+		buffer = 0,
+		callback = function()
+			vim.api.nvim_command([[EslintFixAll]])
+		end,
+	})
+end
+
+local doFormatNonTS = function()
+	vim.api.nvim_create_autocmd("BufWritePre", {
+		group = augroup_format,
+		buffer = 0,
+		callback = function()
+			vim.lsp.buf.formatting_seq_sync()
+		end,
+	})
+end
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
 	-- Enable completion triggered by <c-x><c-o>
 	vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+
+	if client.name == "tsserver" then
+		return doFormatTS()
+	end
+
+	if client.server_capabilities.documentFormattingProvider then
+		vim.api.nvim_clear_autocmds({ buffer = 0, group = augroup_format })
+		doFormatNonTS()
+	end
 end
 
 protocol.CompletionItemKind = {
@@ -50,9 +81,43 @@ local lsp_flags = {
 
 lspconfig.tsserver.setup({
 	on_attach = on_attach,
-	file_types = { "typescript", "typescriptreact", "typescript.tsx" },
+	filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
 	cmd = { "typescript-language-server", "--stdio" },
 	capabilities = capabilities,
+})
+
+lspconfig.eslint.setup({
+	on_attach = on_attach,
+	filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+	cmd = { "vscode-eslint-language-server", "--stdio" },
+	capabilities = capabilities,
+	{
+		codeAction = {
+			disableRuleComment = {
+				enable = true,
+				location = "separateLine",
+			},
+			showDocumentation = {
+				enable = true,
+			},
+		},
+		codeActionOnSave = {
+			enable = true,
+			mode = "all",
+		},
+		format = true,
+		nodePath = "",
+		onIgnoredFiles = "off",
+		packageManager = "npm",
+		quiet = false,
+		rulesCustomizations = {},
+		run = "onType",
+		useESLintClass = false,
+		validate = "on",
+		workingDirectory = {
+			mode = "location",
+		},
+	},
 })
 
 lspconfig.sumneko_lua.setup({

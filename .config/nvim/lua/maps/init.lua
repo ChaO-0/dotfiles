@@ -10,3 +10,5 @@ keymap.set("n", "dw", 'vb"_d')
 keymap.set("n", "<C-a>", "gg<S-v>G")
 
 keymap.set("n", "gD", vim.lsp.buf.definition, { silent = true })
+
+keymap.set("n", "<A-q>", "<CMD>bp<bar>sp<bar>bn<bar>bd<CR>")
