@@ -3,81 +3,23 @@ if not ok then
 	return
 end
 
+local cursor_diagnostics = require("lsp-attaches.cursor-diagnostics")
+local highlight_symbol = require("lsp-attaches.highlight-symbol")
+local formatter = require("lsp-attaches.format")
+
 vim.o.updatetime = 250
 
 local protocol = require("vim.lsp.protocol")
-
-local augroup_format = vim.api.nvim_create_augroup("Format", { clear = true })
-
-local doFormatTS = function()
-	vim.api.nvim_create_autocmd("BufWritePre", {
-		group = augroup_format,
-		buffer = 0,
-		callback = function()
-			vim.api.nvim_command([[EslintFixAll]])
-		end,
-	})
-end
-
-local doFormatNonTS = function()
-	vim.api.nvim_create_autocmd("BufWritePre", {
-		group = augroup_format,
-		buffer = 0,
-		callback = function()
-			vim.lsp.buf.formatting_seq_sync()
-		end,
-	})
-end
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
 	-- Enable completion triggered by <c-x><c-o>
 	vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
-	vim.api.nvim_create_autocmd("CursorHold", {
-		buffer = bufnr,
-		callback = function()
-			local opts = {
-				focusable = false,
-				close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-				border = "rounded",
-				source = "always",
-				prefix = " ",
-				scope = "cursor",
-			}
-			vim.diagnostic.open_float(nil, opts)
-		end,
-	})
 
-	if client.resolved_capabilities.document_highlight then
-		vim.api.nvim_create_augroup("lsp_document_highlight", {
-			clear = false,
-		})
-		vim.api.nvim_clear_autocmds({
-			buffer = bufnr,
-			group = "lsp_document_highlight",
-		})
-		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-			group = "lsp_document_highlight",
-			buffer = bufnr,
-			callback = vim.lsp.buf.document_highlight,
-		})
-		vim.api.nvim_create_autocmd("CursorMoved", {
-			group = "lsp_document_highlight",
-			buffer = bufnr,
-			callback = vim.lsp.buf.clear_references,
-		})
-	end
-
-	if client.name == "tsserver" then
-		vim.api.nvim_clear_autocmds({ buffer = 0, group = augroup_format })
-		return doFormatTS()
-	end
-
-	if client.server_capabilities.documentFormattingProvider then
-		vim.api.nvim_clear_autocmds({ buffer = 0, group = augroup_format })
-		doFormatNonTS()
-	end
+	cursor_diagnostics.watch(bufnr)
+	highlight_symbol.watch(client, bufnr)
+	formatter.formatCode(client)
 end
 
 protocol.CompletionItemKind = {
