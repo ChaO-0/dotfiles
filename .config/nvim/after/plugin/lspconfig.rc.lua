@@ -3,6 +3,8 @@ if not ok then
 	return
 end
 
+vim.o.updatetime = 250
+
 local protocol = require("vim.lsp.protocol")
 
 local augroup_format = vim.api.nvim_create_augroup("Format", { clear = true })
@@ -32,8 +34,43 @@ end
 local on_attach = function(client, bufnr)
 	-- Enable completion triggered by <c-x><c-o>
 	vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+	vim.api.nvim_create_autocmd("CursorHold", {
+		buffer = bufnr,
+		callback = function()
+			local opts = {
+				focusable = false,
+				close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+				border = "rounded",
+				source = "always",
+				prefix = " ",
+				scope = "cursor",
+			}
+			vim.diagnostic.open_float(nil, opts)
+		end,
+	})
+
+	if client.resolved_capabilities.document_highlight then
+		vim.api.nvim_create_augroup("lsp_document_highlight", {
+			clear = false,
+		})
+		vim.api.nvim_clear_autocmds({
+			buffer = bufnr,
+			group = "lsp_document_highlight",
+		})
+		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+			group = "lsp_document_highlight",
+			buffer = bufnr,
+			callback = vim.lsp.buf.document_highlight,
+		})
+		vim.api.nvim_create_autocmd("CursorMoved", {
+			group = "lsp_document_highlight",
+			buffer = bufnr,
+			callback = vim.lsp.buf.clear_references,
+		})
+	end
 
 	if client.name == "tsserver" then
+		vim.api.nvim_clear_autocmds({ buffer = 0, group = augroup_format })
 		return doFormatTS()
 	end
 
@@ -91,7 +128,7 @@ lspconfig.eslint.setup({
 	filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
 	cmd = { "vscode-eslint-language-server", "--stdio" },
 	capabilities = capabilities,
-	{
+	settings = {
 		codeAction = {
 			disableRuleComment = {
 				enable = true,
@@ -145,13 +182,6 @@ lspconfig.sumneko_lua.setup({
 	},
 })
 
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-	underline = true,
-	update_in_insert = false,
-	virtual_text = { spacing = 4, prefix = "●" },
-	severity_sort = true,
-})
-
 -- Diagnostic symbols in the sign column (gutter)
 local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
 for type, icon in pairs(signs) do
@@ -160,9 +190,7 @@ for type, icon in pairs(signs) do
 end
 
 vim.diagnostic.config({
-	virtual_text = {
-		prefix = "●",
-	},
+	virtual_text = false,
 	update_in_insert = true,
 	float = {
 		source = "always", -- Or "if_many"
