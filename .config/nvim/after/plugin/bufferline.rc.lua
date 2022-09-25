@@ -31,3 +31,4 @@ bufferline.setup({
 
 vim.api.nvim_set_keymap("n", "<A-l>", "<cmd>BufferLineCycleNext<cr>", {})
 vim.api.nvim_set_keymap("n", "<A-h>", "<cmd>BufferLineCyclePrev<cr>", {})
+vim.api.nvim_set_keymap("n", "<A-q>", "<CMD>bp<bar>sp<bar>bn<bar>bd<CR>", {})
