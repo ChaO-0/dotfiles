@@ -36,3 +36,4 @@ vim.diagnostic.config({
 require("lsp-attaches.lang-servers.tsserver").start(on_attach, capabilities)
 require("lsp-attaches.lang-servers.eslint").start(on_attach, capabilities)
 require("lsp-attaches.lang-servers.sumneko_lua").start(on_attach, capabilities)
+require("lsp-attaches.lang-servers.yamlls").start(on_attach, capabilities)
